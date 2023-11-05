@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:back_button_interceptor/back_button_interceptor.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 
 import 'package:webdavsync/file_row.dart';
@@ -45,7 +46,24 @@ class FileBrowserPageState extends State<FileBrowserPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(future: webDavHelper.readDir(dirPath), builder: _buildFuture);
+    return FutureBuilder(future: SharedPreferences.getInstance(), builder: load);
+  }
+
+  Widget load(BuildContext context, AsyncSnapshot<SharedPreferences> snapshot) {
+    if (snapshot.connectionState == ConnectionState.done) {
+      if (snapshot.hasData && snapshot.data != null) {
+        SharedPreferences prefs = snapshot.data!;
+        String url = prefs.getString("url") ?? "";
+        if (url.isEmpty) {
+          return const Center(child: Text("Please fill your login data in the Credentials screen"));
+        } else {
+          return FutureBuilder(future: webDavHelper.readDir(dirPath), builder: _buildFuture);
+        }
+      } else {
+        return const Center(child: Text("Could not open SharedPreferences"));
+      }
+    }
+    return const Center(child: CircularProgressIndicator());
   }
 
   Widget _buildFuture(BuildContext context, AsyncSnapshot<List<webdav.File>> snapshot) {
