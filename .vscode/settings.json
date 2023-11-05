@@ -1,0 +1,10 @@
+{
+  "dart.lineLength": 105,
+	"editor.rulers": [
+		{
+			"column": 105,
+			"color": "#99999944"
+		}
+	],
+	"editor.formatOnSave": true,
+}
